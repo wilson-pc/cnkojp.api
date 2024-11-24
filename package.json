@@ -1,0 +1,27 @@
+{
+  "name": "telegramlocaldownloader",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "drizzle-kit": "^0.28.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.699.0",
+    "@aws-sdk/s3-request-presigner": "^3.699.0",
+    "@hono/zod-validator": "^0.4.1",
+    "@libsql/client": "^0.14.0",
+    "@paralleldrive/cuid2": "^2.2.2",
+    "axios": "^1.7.7",
+    "better-sqlite3": "^11.5.0",
+    "drizzle-orm": "^0.36.3",
+    "hono": "^4.6.11",
+    "lodash": "^4.17.21",
+    "telegram": "^2.26.8"
+  }
+}
