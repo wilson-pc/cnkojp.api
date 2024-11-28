@@ -20,6 +20,7 @@ export const files = sqliteTable('files', {
   newMessageId: text('newMessageId'),
   newFileId: text('newFileId'),
   duration: text('duration'),
+  delete:integer('delete', { mode: 'boolean' }).default(false),
   fileReference: text('fileReference'),
   thumbOriginal: text('thumbOriginal'),
   thumbAnimated: text('thumbAnimated'),
@@ -46,4 +47,4 @@ export const filesRelations = relations(files, ({ one }) => ({
 	}),
 }));
 
-export const filesSelect =  files.$inferSelect
+export type FileSelect = typeof files.$inferSelect

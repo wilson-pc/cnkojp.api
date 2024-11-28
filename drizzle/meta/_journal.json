@@ -15,6 +15,13 @@
       "when": 1732400891288,
       "tag": "0001_overconfident_lizard",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1732752604316,
+      "tag": "0002_misty_gamma_corps",
+      "breakpoints": true
     }
   ]
 }
