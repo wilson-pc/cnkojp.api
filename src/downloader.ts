@@ -124,7 +124,7 @@ console.log("Mensaje obtenido",message);
 
   const result = await client.getMessages(chatId, {
     filter: Api.InputMessagesFilterVideo as any,
-    limit: 400
+    limit: 500
   })
   console.log(result.length)
 
@@ -134,7 +134,7 @@ console.log("Mensaje obtenido",message);
     }
   })
   const allIgnore = [...whitelist, ...all]
-  const fde = result.splice(300)
+  const fde = result.splice(400)
 
   const chunk = _.chunk(fde, 30)
   const currentChat: any = await db.query.folders.findFirst({

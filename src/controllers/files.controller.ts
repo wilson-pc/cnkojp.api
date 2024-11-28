@@ -42,8 +42,9 @@ filesRouter.get('/folder/:folderId', async (c) => {
 filesRouter.get('/:fileId', async (c) => {
     const fileId= c.req.param('fileId')
     const foldersRs = await db.query.files.findFirst({
-        where: and(eq(files.fileId, fileId), eq(files.delete, false)),
+        where: and(eq(files.id, fileId), eq(files.delete, false)),
     })
+    console.log(foldersRs,fileId)
     if(!foldersRs){
         return c.json({error:'No existe'}, 404)
     }
