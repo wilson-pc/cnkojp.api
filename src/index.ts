@@ -93,7 +93,6 @@ app.get('/download/:id', async (c) => {
   const file = await db.query.files.findFirst({
     where: eq(files.id, fileId)
   })
-  console.log(file)
     const peerId= isNumber(file?.chatId)?Number(file?.chatId ?? 0):file?.chatId
   const peer = await tg.resolvePeer(peerId as any)
   console.log('peer', peer)
