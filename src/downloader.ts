@@ -38,7 +38,8 @@ const tg = new TelegramClient({
   const peer = await tg.resolvePeer(peerId ?? '')
   const dialogs = await tg.searchMessages({
     chatId: peer,
-    limit: 10,
+    limit: 100,
+
     filter: {
       _: 'inputMessagesFilterVideo'
     }
@@ -53,13 +54,14 @@ const tg = new TelegramClient({
 
   const all = await db.query.files.findMany({
     columns: {
-      fileId: true
+      fileId: true,
+      originalUniqueFileId: true
     }
   })
   const allIgnore = [...whitelist, ...all]
   const fde = dialogs.splice(500)
 
-  const chunk = _.chunk(fde, 30)
+  const chunk = _.chunk(dialogs, 2)
   const currentChat: any = await db.query.folders.findFirst({
     where: eq(folders.chatId, chatId ?? '')
   })
@@ -68,7 +70,14 @@ const tg = new TelegramClient({
     const promises: any[] = []
     messages.forEach((elementr: any, index: number) => {
       const element = elementr as LocalMessage
-      if (!allIgnore.find((w) => w.fileId === element?.media?.fileId)) {
+      console.log('element', element.media.fileId)
+      if (
+        !allIgnore.find(
+          (w:any) =>
+            w.fileId === element?.media?.fileId ||
+            w.originalUniqueFileId === element?.media?.uniqueFileId
+        )
+      ) {
         promises.push(downloader(element, index, currentChat))
       } else {
         console.log('ignorando', index)
@@ -693,7 +702,6 @@ async function downloader(
           where: and(
             eq(files.fileId, fileId.toString()),
             eq(files.duration, `${duration}`),
-            eq(files.duration, `${duration}`),
             eq(files.originalSize, `${fileSize}`)
           )
         })
@@ -706,7 +714,7 @@ async function downloader(
         if (archive === undefined && duration > 12) {
           console.log('descargando', index, name, fileSize, fileId.toString())
           if (!existsSync(resolve('downloads', name))) {
-            await tg.downloadToFile(name, fileId)
+            await tg.downloadToFile(resolve('downloads', name), fileId)
           }
           const { video, info, thumb } = await getVideo(
             name,
@@ -727,7 +735,7 @@ async function downloader(
             file: video.path ?? '',
             fileSize: info.size
           })
-const thumbv= await tg.uploadFile({ file:grid.path})
+          const thumbv = await tg.uploadFile({ file: grid.path })
           const uploaded: any = await tg.sendMedia(newChatId, {
             file: media,
             type: 'video',
@@ -737,7 +745,7 @@ const thumbv= await tg.uploadFile({ file:grid.path})
             width: width,
             height: height,
             supportsStreaming: true,
-            thumb:thumbv,
+            thumb: thumbv
           })
 
           // const originalThumb=` ${chatId}/original/${taskId}.jpg`

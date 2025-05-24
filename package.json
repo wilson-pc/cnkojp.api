@@ -23,7 +23,7 @@
     "@hono/node-server": "^1.14.2",
     "@hono/zod-validator": "^0.5.0",
     "@libsql/client": "^0.15.7",
-    "@mtcute/node": "^0.23.0",
+    "@mtcute/node": "^0.24.0",
     "@paralleldrive/cuid2": "^2.2.2",
     "axios": "^1.9.0",
     "dotenv": "^16.5.0",

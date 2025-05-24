@@ -1,0 +1,16 @@
+GET http://localhost:3002/api/folder HTTP/1.1
+Content-Type: application/json
+
+{
+ "url":"https://mangaromance19.com/manga/el-duque-no-correspondido/"
+    //https://lectormanga.com/view_uploads/766155
+}
+###
+
+POST  https://cnkorjp.hibapp.com/api/folder HTTP/1.1
+Content-Type: application/json
+
+{
+ "name":"抖音网红/反差/自拍（微密圈 私拍",
+ "chatId":"douyi567"
+}

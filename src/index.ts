@@ -53,17 +53,22 @@ app.get('/download/lite/:id', async (c) => {
     where: eq(files.id, fileId)
   })
   console.log('file', file)
+    let fileHash= file?.originalHashFileId
+  if(!fileHash){
     const peerId= isNumber(file?.newChatId)?Number(file?.newChatId ?? 0):file?.newChatId
   const peer = await tg.resolvePeer(peerId)
   console.log('peer', peer)
   const [msg] = await tg.getMessages(peer, [Number(file?.newMessageId) ?? 0])
   const media = msg?.media as any
+  fileHash= media?.fileId
+  }
+  const nodeStream = tg.downloadAsNodeStream(fileHash)
 
-  const nodeStream = tg.downloadAsNodeStream(media.fileId)
-  console.log('stream', media)
 
-  const fileName = encodeURIComponent(file?.name || 'download')
-
+// Replace the fileName line with:
+const originalName = file?.name || 'download.mp4';
+const textToAdd = '_av1'; // texto que quieres agregar
+const fileName = encodeURIComponent(originalName.replace(/(\.[^.]+)?$/, textToAdd + '$&'));
   const webStream = new ReadableStream({
     start(controller) {
       nodeStream.on('data', (chunk) => {
@@ -95,13 +100,16 @@ app.get('/download/:id', async (c) => {
     where: eq(files.id, fileId)
   })
   console.log('file', file?.fileId)
+  let fileHash= file?.originalHashFileId
+  if(!fileHash){
     const peerId= isNumber(file?.chatId)?Number(file?.chatId ?? 0):file?.chatId
   const peer = await tg.resolvePeer(peerId as any)
   console.log('peer', peer)
   const [msg] = await tg.getMessages(peer, [Number(file?.messageId) ?? 0])
   const media = msg?.media as any
-
-  const nodeStream = tg.downloadAsNodeStream(media.fileId)
+  fileHash= media?.fileId
+  }
+  const nodeStream = tg.downloadAsNodeStream(fileHash??'')
 
   const fileName = encodeURIComponent(file?.name || 'download')
 
