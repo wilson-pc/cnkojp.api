@@ -31,7 +31,7 @@ export const files = sqliteTable('files', {
   original: integer('original', { mode: 'boolean' }).default(false),
   originalSize: text('originalSize'),
   version: integer('version').default(1),
-  info: text('info', { mode: 'json' }),
+  info: text('info', { mode: 'json' }).$type<Record<string, any>>(),
   originalUniqueFileId: text('originalUniqueFileId'),
   newUniqueFileId: text('newUniqueFileId'),
   originalHashFileId: text('originalHashFileId'),

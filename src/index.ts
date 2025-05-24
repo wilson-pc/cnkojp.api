@@ -1,16 +1,17 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { serve } from '@hono/node-server'
-import { Env } from './types'
+import { Env, TelegramMedia } from './types'
 
 import { db } from './db'
 import { eq } from 'drizzle-orm'
 import { files } from './schema/index'
-import { TelegramClient as tgClient } from '@mtcute/node'
+import { Message, TelegramClient as tgClient } from '@mtcute/node'
 import 'dotenv/config'
 import folderRoute from './controllers/folderController'
 import filesRouter from './controllers/filesController'
 import { authController } from './controllers/authController'
+
 
 async function checkSignedIn() {
   try {
@@ -49,20 +50,20 @@ app.get('/', async (c) => {
 })
 app.get('/download/lite/:id', async (c) => {
   const fileId = c.req.param('id')
-  const file:any = await db.query.files.findFirst({
+  const file = await db.query.files.findFirst({
     where: eq(files.id, fileId)
   })
   console.log('file', file)
-    let fileHash= file?.originalHashFileId
+    let fileHash= file?.newHashFileId
   if(!fileHash){
     const peerId= isNumber(file?.newChatId)?Number(file?.newChatId ?? 0):file?.newChatId
-  const peer = await tg.resolvePeer(peerId)
+  const peer = await tg.resolvePeer(peerId??'')
   console.log('peer', peer)
   const [msg] = await tg.getMessages(peer, [Number(file?.newMessageId) ?? 0])
   const media = msg?.media as any
   fileHash= media?.fileId
   }
-  const nodeStream = tg.downloadAsNodeStream(fileHash)
+  const nodeStream = tg.downloadAsNodeStream(fileHash??'')
 
 
 // Replace the fileName line with:
