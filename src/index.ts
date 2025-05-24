@@ -156,5 +156,5 @@ app.route('/auth', authController)
 //app.route('/downloader', downloadRoute)
 serve({
   fetch: app.fetch,
-  port: 8787
+  port: Number(process.env.PORT) || 3000,
 })
