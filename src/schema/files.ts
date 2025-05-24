@@ -9,7 +9,7 @@ export const files = sqliteTable('files', {
     .$defaultFn(() => createId()),
   name: text('name').notNull(),
   description: text('description'),
-  chatId: text('chatId').notNull().references(() => folders.chatId),
+  chatId: text('chatId').notNull().references(() => folders.chatId,{onUpdate:'cascade'}),
   fileId: text('fileId').notNull(),
   folderId: text('folderId').notNull(),
   type: text('type'),
@@ -32,6 +32,10 @@ export const files = sqliteTable('files', {
   originalSize: text('originalSize'),
   version: integer('version').default(1),
   info: text('info', { mode: 'json' }),
+  originalUniqueFileId: text('originalUniqueFileId'),
+  newUniqueFileId: text('newUniqueFileId'),
+  originalHashFileId: text('originalHashFileId'),
+  newHashFileId: text('newHashFileId'),
   createdAt: integer('createdAt', { mode: 'timestamp_ms' })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),

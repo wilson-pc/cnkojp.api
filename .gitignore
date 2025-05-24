@@ -176,3 +176,7 @@ dist
 thumb
 static
 downloads
+
+my-account
+my-account-shm
+my-account-wal
