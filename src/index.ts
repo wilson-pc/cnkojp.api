@@ -52,7 +52,8 @@ app.get('/download/lite/:id', async (c) => {
   const file:any = await db.query.files.findFirst({
     where: eq(files.id, fileId)
   })
-    const peerId= isNumber(file?.chatId)?Number(file?.chatId ?? 0):file?.chatId
+  console.log('file', file)
+    const peerId= isNumber(file?.newChatId)?Number(file?.newChatId ?? 0):file?.newChatId
   const peer = await tg.resolvePeer(peerId)
   console.log('peer', peer)
   const [msg] = await tg.getMessages(peer, [Number(file?.newMessageId) ?? 0])
@@ -93,6 +94,7 @@ app.get('/download/:id', async (c) => {
   const file = await db.query.files.findFirst({
     where: eq(files.id, fileId)
   })
+  console.log('file', file?.fileId)
     const peerId= isNumber(file?.chatId)?Number(file?.chatId ?? 0):file?.chatId
   const peer = await tg.resolvePeer(peerId as any)
   console.log('peer', peer)
@@ -100,7 +102,6 @@ app.get('/download/:id', async (c) => {
   const media = msg?.media as any
 
   const nodeStream = tg.downloadAsNodeStream(media.fileId)
-  console.log('stream', media)
 
   const fileName = encodeURIComponent(file?.name || 'download')
 
