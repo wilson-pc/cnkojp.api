@@ -36,10 +36,11 @@ const tg = new TelegramClient({
 
   const peerId = isNumber(chatId) ? Number(chatId) : chatId
   const peer = await tg.resolvePeer(peerId ?? '')
+
   const dialogs = await tg.searchMessages({
     chatId: peer,
+     offset: 5560,
     limit: 100,
-
     filter: {
       _: 'inputMessagesFilterVideo'
     }
@@ -49,8 +50,9 @@ const tg = new TelegramClient({
       fileId: true
     }
   })
+ 
+  console.log(dialogs[dialogs.length-1].id)
 
-  console.log(dialogs.length)
 
   const all = await db.query.files.findMany({
     columns: {
@@ -59,7 +61,7 @@ const tg = new TelegramClient({
     }
   })
   const allIgnore = [...whitelist, ...all]
-  const fde = dialogs.splice(500)
+  const fde = dialogs.splice(100)
 
   const chunk = _.chunk(dialogs, 2)
   const currentChat: any = await db.query.folders.findFirst({
@@ -711,7 +713,7 @@ async function downloader(
             ).toLowerCase()}`
           : `${fileId.toString()}.mp4`
 
-        if (archive === undefined && duration > 12) {
+        if (archive === undefined && duration > 12 && duration<3000) {
           console.log('descargando', index, name, fileSize, fileId.toString())
           if (!existsSync(resolve('downloads', name))) {
             await tg.downloadToFile(resolve('downloads', name), fileId)

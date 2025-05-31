@@ -54,16 +54,15 @@ app.get('/download/lite/:id', async (c) => {
     where: eq(files.id, fileId)
   })
   console.log('file', file)
-    let fileHash= file?.newHashFileId
-  if(!fileHash){
+
     const peerId= isNumber(file?.newChatId)?Number(file?.newChatId ?? 0):file?.newChatId
   const peer = await tg.resolvePeer(peerId??'')
   console.log('peer', peer)
   const [msg] = await tg.getMessages(peer, [Number(file?.newMessageId) ?? 0])
   const media = msg?.media as any
-  fileHash= media?.fileId
-  }
-  const nodeStream = tg.downloadAsNodeStream(fileHash??'')
+
+  
+  const nodeStream = tg.downloadAsNodeStream(media?.fileId??'')
 
 
 // Replace the fileName line with:
@@ -100,17 +99,14 @@ app.get('/download/:id', async (c) => {
   const file = await db.query.files.findFirst({
     where: eq(files.id, fileId)
   })
-  console.log('file', file?.fileId)
-  let fileHash= file?.originalHashFileId
-  if(!fileHash){
+ 
     const peerId= isNumber(file?.chatId)?Number(file?.chatId ?? 0):file?.chatId
   const peer = await tg.resolvePeer(peerId as any)
   console.log('peer', peer)
   const [msg] = await tg.getMessages(peer, [Number(file?.messageId) ?? 0])
   const media = msg?.media as any
-  fileHash= media?.fileId
-  }
-  const nodeStream = tg.downloadAsNodeStream(fileHash??'')
+  
+  const nodeStream = tg.downloadAsNodeStream(media?.fileId??'')
 
   const fileName = encodeURIComponent(file?.name || 'download')
 
