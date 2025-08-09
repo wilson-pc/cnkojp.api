@@ -11,6 +11,6 @@ POST  https://cnkorjp.hibapp.com/api/folder HTTP/1.1
 Content-Type: application/json
 
 {
- "name":"抖音网红/反差/自拍（微密圈 私拍",
- "chatId":"douyi567"
+ "name":"女同 拉拉 百合",
+ "chatId":"yankong5"
 }

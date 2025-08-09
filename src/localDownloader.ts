@@ -35,54 +35,33 @@ const tg = new TelegramClient({
   }
 
   const peerId = isNumber(chatId) ? Number(chatId) : chatId
-  const peer = await tg.resolvePeer(peerId ?? '')
+  const peer = await tg.resolvePeer(peerId?? '')
+  console.log('peer', peer)
 
   const dialogs = await tg.searchMessages({
     chatId: peer,
     limit: 100,
     filter: {
-      _: 'inputMessagesFilterVideo'
+      _: 'inputMessagesFilterMusic'
     }
   })
-  const whitelist = await db.query.whitelist.findMany({
-    columns: {
-      fileId: true
-    }
-  })
+  
  
   console.log(dialogs[dialogs.length-1].id)
 
 
-  const all = await db.query.files.findMany({
-    columns: {
-      fileId: true,
-      originalUniqueFileId: true
-    }
-  })
-  const allIgnore = [...whitelist, ...all]
-  const fde = dialogs.splice(100)
+  //const fde = dialogs.splice(100)
 
   const chunk = _.chunk(dialogs, 3)
-  const currentChat: any = await db.query.folders.findFirst({
-    where: eq(folders.chatId, chatId ?? '')
-  })
-
+  
   for await (const messages of chunk) {
     const promises: any[] = []
     messages.forEach((elementr: any, index: number) => {
       const element = elementr as LocalMessage
       console.log('element', element.media.fileId)
-      if (
-        !allIgnore.find(
-          (w:any) =>
-            w.fileId === element?.media?.fileId ||
-            w.originalUniqueFileId === element?.media?.uniqueFileId
-        )
-      ) {
-        promises.push(downloader(element, index, currentChat))
-      } else {
-        console.log('ignorando', index)
-      }
+
+        promises.push(downloader(element, index))
+     
     })
     await Promise.all(promises)
     console.log('UNA VUELKTA')
@@ -680,15 +659,14 @@ async function getVideo(
 
 async function downloader(
   message: LocalMessage,
-  index: number,
-  currentChat: FolderSelect
+  index: number
 ) {
   return new Promise(async (resolver, rejct) => {
     if (message.media) {
       try {
         const taskId = createId()
         const { media } = message
-
+       console.log('media', media)
         const {
           duration,
           width,
@@ -699,113 +677,21 @@ async function downloader(
           uniqueFileId
         } = media
 
-        const archive = await db.query.files.findFirst({
-          where: and(
-            eq(files.fileId, fileId.toString()),
-            eq(files.duration, `${duration}`),
-            eq(files.originalSize, `${fileSize}`)
-          )
-        })
+
         const name = fileName
           ? `${fileName.replace(extname(fileName), '')}_${fileSize}${extname(
               fileName
             ).toLowerCase()}`
-          : `${fileId.toString()}.mp4`
-
-        if (archive === undefined && duration > 12 && duration<3000) {
+          : `${fileId.toString()}.mp3`
+ 
+     
           console.log('descargando', index, name, fileSize, fileId.toString())
-          if (!existsSync(resolve('downloads', name))) {
-            await tg.downloadToFile(resolve('downloads', name), fileId)
+          if (!existsSync(resolve('direct-downloads', name))) {
+            await tg.downloadToFile(resolve('direct-downloads', name), fileId)
           }
-          const { video, info, thumb } = await getVideo(
-            name,
-            extname(name).toLowerCase(),
-            `${taskId}.avif`
-          )
-          console.log('Convertido', index, name, fileSize, fileId.toString())
-
-          const [header, grid] = await Promise.all([
-            generateThumbLocalWithHeader(
-              name,
-              video.path ?? '',
-              resolve('thumb/header')
-            ),
-            generateThumbLocalGrid(name, resolve('thumb/grid'))
-          ])
-          const media = await tg.uploadFile({
-            file: video.path ?? '',
-            fileSize: info.size
-          })
-          const thumbv = await tg.uploadFile({ file: grid.path })
-          const uploaded: any = await tg.sendMedia(newChatId, {
-            file: media,
-            type: 'video',
-            fileMime: 'video/mp4',
-            fileName: name,
-            duration: duration,
-            width: width,
-            height: height,
-            supportsStreaming: true,
-            thumb: thumbv
-          })
-
-          // const originalThumb=` ${chatId}/original/${taskId}.jpg`
-          const animatedThumb = `${chatId}/animated/${taskId}.avif`
-          const whitHeader = `${chatId}/whitHeader/${taskId}.jpg`
-          const gridThumb = `${chatId}/grid/${taskId}.jpg`
-
-          await db.insert(files).values({
-            id: taskId,
-            name: name,
-            chatId: chatId ?? '',
-            fileId: fileId,
-            folderId: currentChat.id,
-            type: 'video',
-            messageId: message.id.toString(),
-            mimeType: 'video/mp4',
-            size: info.size.toString(),
-            thumbAnimated: animatedThumb,
-            thumbWhitHeader: whitHeader,
-            fileReference: `${chatId}/${name}`,
-            thumbGrid: gridThumb,
-            original: true,
-            originalSize: fileSize.toString(),
-            info: info,
-            duration: duration.toString(),
-            newChatId: newChatId.toString(),
-            newFileId: uploaded?.media?.fileId,
-            newMessageId: uploaded?.id,
-            version: 1,
-            originalUniqueFileId: uniqueFileId,
-            newUniqueFileId: uploaded?.media?.uniqueFileId,
-            originalHashFileId: fileId,
-            newHashFileId: uploaded?.media?.fileId
-          })
-
-          await Promise.all([
-            uploadImage(
-              animatedThumb,
-              readFileSync(thumb.path ?? ''),
-              'image/avif'
-            ),
-            uploadImage(
-              whitHeader,
-              readFileSync(header.path ?? ''),
-              'image/jpeg'
-            ),
-            uploadImage(gridThumb, readFileSync(grid.path ?? ''), 'image/jpeg')
-          ])
-          const infoString = JSON.stringify(info, (k, v) =>
-            v && typeof v === 'object' ? v : '' + v
-          )
-          console.log(infoString)
-
-          console.log('convetido', index, name)
+        
           resolver({ status: 'finish' })
-        } else {
-          console.log('convetido anteriormente', index, name)
-          resolver({ status: 'finish' })
-        }
+
       } catch (error: any) {
         console.log('ERROR', index)
         console.log(error)
